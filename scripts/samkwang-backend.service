@@ -1,0 +1,19 @@
+[Unit]
+Description=SAMKWANG AI FastAPI backend
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/user2/SAMKWANG AI/backend
+Environment=PYTHONPATH=.
+EnvironmentFile=-/home/user2/SAMKWANG AI/.env
+ExecStart=/home/user2/SAMKWANG AI/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=5
+
+# journalctl -u samkwang-backend -f
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SAMKWANG AI 로그인</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f7f7f8;
+      --panel: #ffffff;
+      --border: #e5e5e5;
+      --text: #0d0d0d;
+      --muted: #6e6e80;
+      --primary: #0d0d0d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .sub {
+      color: var(--muted);
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      margin-top: 12px;
+    }
+    input {
+      width: 100%;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 12px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+    input:focus { border-color: #222; }
+    .row {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    button {
+      flex: 1;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .msg {
+      margin-top: 14px;
+      font-size: 13px;
+      white-space: pre-wrap;
+      color: var(--muted);
+      min-height: 18px;
+    }
+    .ok { color: #0f8a5f; }
+    .err { color: #b42318; }
+    .back {
+      margin-top: 16px;
+      display: inline-block;
+      font-size: 13px;
+      color: #333;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>로그인</h1>
+    <p class="sub">SAMKWANG AI 계정으로 로그인하세요.</p>
+
+    <label for="email">이메일 (아이디)</label>
+    <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@company.com" />
+
+    <label for="password">비밀번호</label>
+    <input id="password" type="password" autocomplete="current-password" />
+
+    <div class="row">
+      <button class="primary" id="btnLogin" type="button">로그인</button>
+      <button id="btnSignup" type="button">회원가입</button>
+    </div>
+
+    <p id="msg" class="msg"></p>
+    <a class="back" href="/">채팅으로 돌아가기</a>
+  </div>
+
+  <script>
+    const emailEl = document.getElementById("email");
+    const password = document.getElementById("password");
+    const btnLogin = document.getElementById("btnLogin");
+    const btnSignup = document.getElementById("btnSignup");
+    const msg = document.getElementById("msg");
+
+    function setMsg(text, ok) {
+      msg.textContent = text;
+      msg.className = "msg " + (ok ? "ok" : "err");
+    }
+
+    async function postJson(url, body) {
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error((data && data.detail) ? String(data.detail) : "요청 실패 (" + r.status + ")");
+      }
+      return data;
+    }
+
+    function isValidEmail(s) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+    }
+
+    function getPayload() {
+      const email = (emailEl.value || "").trim();
+      const p = (password.value || "").trim();
+      if (!email || !p) throw new Error("이메일과 비밀번호를 입력해 주세요.");
+      if (!isValidEmail(email)) throw new Error("올바른 이메일 형식으로 입력해 주세요.");
+      return { email, password: p };
+    }
+
+    btnLogin.addEventListener("click", async () => {
+      try {
+        const payload = getPayload();
+        const data = await postJson("/api/auth/login", {
+          email: payload.email,
+          password: payload.password,
+        });
+        localStorage.setItem("samkwang_access_token", data.access_token);
+        localStorage.setItem("samkwang_username", data.username);
+        setMsg("로그인 성공. 채팅 화면으로 이동합니다.", true);
+        setTimeout(() => { window.location.href = "/"; }, 400);
+      } catch (e) {
+        setMsg(String(e.message || e), false);
+      }
+    });
+
+    btnSignup.addEventListener("click", async () => {
+      window.location.href = "/signup.html";
+    });
+
+    [emailEl, password].forEach((el) => {
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          btnLogin.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

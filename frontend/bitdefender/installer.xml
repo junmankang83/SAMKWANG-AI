@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config version="1.0">
+
+
+
+	<features>
+		<feature name="FileScan" action="1"/>
+		<feature name="UserControl" action="0"/>
+		<feature name="Antiphishing" action="0"/>
+		<feature name="Firewall" action="0"/>
+		<feature name="UpdateServer" action="0"/>
+		<feature name="BehavioralScan" action="0"/>
+		<feature name="TrafficScan" action="0"/>
+		<feature name="MailServers" action="0"/>
+		<feature name="DataLossPrevention" action="0"/>
+		<feature name="ApplicationControl" action="0"/>
+		<feature name="PowerUser" action="0"/>
+		<feature name="EventCorrelator" action="0"/> 
+		<feature name="VolumeEncryption" action="0"/> 
+		<feature name="PatchManagement" action="0"/>
+		<feature name="PatchManagementServer" action="0"/>
+		<feature name="VulnerabilityAssessment" action="1"/> 
+		<feature name="AntiExploit" action="0"/>
+		<feature name="NetworkMonitor" action="0"/>
+	<feature name="IntegrityMonitor" action="0"/><feature name="ActivityMonitor" action="0"/><feature name="ContainerProtection" action="0"/></features>
+	
+	<serverAddress strVar="EpagServer">https://cloud-ecs.gravityzone.bitdefender.com/hydra</serverAddress>
+	<customerId strVar="EpagCustId">697c3b5d16d9c082d10e229a</customerId>
+	<connTime strVar="EpagConnTime">1800</connTime>
+	<userId strVar="EpagUserId">697c3b5f16d9c082d10e229b</userId>
+
+	<downloadUrl strVar="DownloadUrl"><![CDATA[https://download.bitdefender.com/SMB/Hydra/release/bst_win]]></downloadUrl>
+
+	<installPath strVar="InstallDir"><![CDATA[%PROGRAMFILES%]]></installPath>
+
+	<localization strVar="localization">ko-KR</localization>
+	<arrakisUpdateServer strVar="ArrakisUpdateServer">update-cloud.2d585.cdn.bitdefender.net:7074</arrakisUpdateServer>
+
+	<rebootIfNeeded var="RebootIfNeeded">0</rebootIfNeeded>
+	<forceResumeAfterReboot var="ForceResumeAfterReboot">0</forceResumeAfterReboot>
+
+	<encryptedPass></encryptedPass>
+
+	<remoteScanSettings>
+		<servers></servers>
+		<enableRemoteScan>0</enableRemoteScan>
+	</remoteScanSettings>
+
+	<scanType strVar="ScanType">full</scanType>
+
+	<scanTypeDetection>
+		<detectEC2 scanType="light" enableRemoteScan="1" detectEC2Url="http://169.254.169.254/latest/meta-data/instance-id">0</detectEC2>
+        <detectAzure scanType="full" enableRemoteScan="0" detectAzureUrl="http://169.254.169.254/metadata/instance/compute/vmId?api-version=2017-08-01&amp;format=text">0</detectAzure>
+		<detectVM scanType="light" enableRemoteScan="1">1</detectVM>
+		<detectSlowMachine scanType="light" enableRemoteScan="1">1</detectSlowMachine>
+
+	</scanTypeDetection>
+
+	<competitorRemoval>
+		<execute mode="never"/> 
+		<useExternal value="yes"/>
+		<exclude>
+        	
+    	</exclude>
+	</competitorRemoval>
+	
+	<keepSettings var="KeepSettings">1</keepSettings>
+	<keepFeatures var="KeepFeatures">0</keepFeatures>
+
+	<proxyServer strVar="ProxyServer"></proxyServer>
+
+	<proxyPort strVar="ProxyPort"></proxyPort>
+
+	<proxyUser strVar="ProxyUser"></proxyUser>
+
+	<proxyPass strVar="ProxyPass"></proxyPass>
+
+	<installLink strVar="InstallLink"></installLink>
+
+	<epagCustomField strVar="EpagCustomField"><![CDATA[{"productType":0}]]></epagCustomField> 
+
+	<statusLink strVar="StatusLink">https://cloud-ecs.gravityzone.bitdefender.com/tasks/state</statusLink>
+
+	<submitDumps var="SubmitDumps">1</submitDumps>
+	<submitQuar var="SubmitQuar">1</submitQuar>
+	<submitQuarInterval var="SubmitQuarInterval">3600</submitQuarInterval>
+	<submitSuspicious var="SubmitSuspicious">1</submitSuspicious>
+
+	<epagConfig>
+		<authToken strVar="EpagToken">KNGXTNMN6vM8rzfZyP7KzQ==</authToken>
+	</epagConfig>
+
+<disableScanBeforeInstall var="DisableScanBeforeInstall">1</disableScanBeforeInstall><submissionSettings><securityFeedback>1</securityFeedback><criticalProtection>1</criticalProtection><fileSamples>1</fileSamples><dumps>1</dumps><licenseUsage>1</licenseUsage></submissionSettings><systemConfig><ATC><OperatingMode>Full</OperatingMode></ATC><DCI><OperatingMode>Sync</OperatingMode></DCI></systemConfig><pinnedProductVersion></pinnedProductVersion></config>
