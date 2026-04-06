@@ -22,9 +22,11 @@ def hash_password(plain: str) -> str:
 
 
 def verify_password(plain: str, password_hash: str) -> bool:
+    if not password_hash or not isinstance(password_hash, str):
+        return False
     try:
         return bcrypt.checkpw(plain.encode("utf-8"), password_hash.encode("utf-8"))
-    except ValueError:
+    except (ValueError, TypeError):
         return False
 
 

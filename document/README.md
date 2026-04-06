@@ -2,6 +2,16 @@
 
 FastAPI 기반 챗봇 백엔드, MCP 서버, 간단한 프론트엔드를 포함하는 RAG 시스템 템플릿입니다.
 
+## RAG 문서 폴더(선택)
+
+채팅 질문에 따라 `document/` 아래에서 **우선 검색**하는 하위 폴더가 나뉩니다. 폴더를 만든 뒤 관리자 **문서 동기화**(`POST /api/documents/sync`)를 실행하면 인덱스에 `rel_path`가 반영됩니다.
+
+- `failure encyclopedia/` — 불량·결함 관련 질문
+- `knowledge/` — 일반 지식(위 두 유형에 안 맞을 때 기본)
+- `companyrule/` — 규정·내규 문의
+
+폴더명은 루트 `.env`의 `RAG_FAILURE_SUBDIR`, `RAG_KNOWLEDGE_SUBDIR`, `RAG_RULES_SUBDIR`로 바꿀 수 있습니다.
+
 ## 구성
 
 - `backend/`: FastAPI 앱, RAG 서비스, OpenAI 연동

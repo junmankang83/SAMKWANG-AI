@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+import logging
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -25,6 +26,15 @@ from ..services.auth_service import (
 )
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+def _safe_ensure_login_admin_seed() -> None:
+    """로그인 성공 후에도 DB 시드 실패 시 500 이 나지 않도록 격리."""
+    try:
+        ensure_login_admin_column_and_seed(engine)
+    except Exception:
+        logger.exception("ensure_login_admin_column_and_seed 실패(로그인은 유지됩니다)")
 
 
 @router.post("/auth/signup", response_model=Token)
@@ -42,7 +52,7 @@ def signup(payload: UserSignup, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(row)
     # login.is_admin 시드(지정 이메일만 True). 직후 ORM과 동기화.
-    ensure_login_admin_column_and_seed(engine)
+    _safe_ensure_login_admin_seed()
     db.refresh(row)
 
     token = create_access_token(row.email)
@@ -59,10 +69,10 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
     if account and verify_password(payload.password, account.password_hash):
         if account.is_locked:
             raise HTTPException(status_code=403, detail="잠긴 계정입니다.")
-        account.last_login = datetime.utcnow()
+        account.last_login = datetime.now(timezone.utc)
         account.login_attempts = 0
         db.commit()
-        ensure_login_admin_column_and_seed(engine)
+        _safe_ensure_login_admin_seed()
         db.refresh(account)
         token = create_access_token(account.email)
         return Token(
@@ -76,9 +86,10 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
     if user and verify_password(payload.password, user.password_hash):
         if user.is_locked:
             raise HTTPException(status_code=403, detail="잠긴 계정입니다.")
-        user.last_login = datetime.utcnow()
+        user.last_login = datetime.now(timezone.utc)
         user.login_attempts = 0
         db.commit()
+        _safe_ensure_login_admin_seed()
         token = create_access_token(user.username)
         return Token(
             access_token=token,

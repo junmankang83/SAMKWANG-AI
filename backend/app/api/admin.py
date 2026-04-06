@@ -1,7 +1,6 @@
 """
 관리자 전용 API
 """
-from pathlib import Path
 from typing import Union
 
 from fastapi import APIRouter, Depends
@@ -9,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from ..config import Settings, get_settings
+from ..config import Settings, get_settings, resolved_documents_dir
 from ..database import get_db
 from ..deps import require_admin
 from ..models.login_account import LoginAccount
@@ -42,7 +41,7 @@ async def admin_overview(
     """시스템 요약(관리자만)."""
     total_users = db.query(func.count(User.user_id)).scalar() or 0
 
-    doc_dir = Path(settings.documents_path)
+    doc_dir = resolved_documents_dir(settings)
     file_count = 0
     if doc_dir.exists():
         file_count = sum(1 for p in doc_dir.rglob("*") if p.is_file())
@@ -59,7 +58,7 @@ async def admin_overview(
         admin_count_env_hint=settings.admin_usernames,
         indexed_documents=indexed,
         document_files_count=file_count,
-        documents_path=settings.documents_path,
+        documents_path=str(doc_dir),
         vector_db_path=settings.vector_db_path,
         default_chat_model=CHAT_MODEL,
         embedding_model=EMBEDDING_MODEL,

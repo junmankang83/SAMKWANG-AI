@@ -101,11 +101,52 @@ class VectorStore:
         if len(self._documents) != original:
             self.persist()
 
-    def _similarity_search_tokens(self, query: str, k: int) -> List[Tuple[str, dict]]:
+    @staticmethod
+    def _normalize_rel_prefixes(prefixes: list[str]) -> list[str]:
+        out: list[str] = []
+        for p in prefixes:
+            n = str(p).strip().replace("\\", "/").lower().strip("/")
+            if n:
+                out.append(n + "/")
+        return out
+
+    @staticmethod
+    def metadata_matches_rel_prefixes(metadata: dict, normalized_prefixes: list[str]) -> bool:
+        """rel_path 가 없는 레거시 청크는 필터 시 제외."""
+        rp = str(metadata.get("rel_path") or "").replace("\\", "/").lower()
+        if not rp:
+            return False
+        for pfx in normalized_prefixes:
+            if rp.startswith(pfx):
+                return True
+        return False
+
+    def _candidate_documents(
+        self,
+        rel_path_prefixes: list[str] | None,
+    ) -> list[dict]:
+        if rel_path_prefixes is None:
+            return self._documents
+        np = self._normalize_rel_prefixes(rel_path_prefixes)
+        if not np:
+            return self._documents
+        return [
+            d
+            for d in self._documents
+            if self.metadata_matches_rel_prefixes(d.get("metadata", {}), np)
+        ]
+
+    def _similarity_search_tokens(
+        self,
+        query: str,
+        k: int,
+        candidate_docs: list[dict] | None = None,
+    ) -> List[Tuple[str, dict]]:
+        docs = candidate_docs if candidate_docs is not None else self._documents
         query_tokens = self._tokenize(query)
         if not query_tokens:
             fallback = sorted(
-                self._documents,
+                docs,
                 key=lambda item: item.get("metadata", {}).get("modified_ns", 0),
                 reverse=True,
             )
@@ -116,7 +157,7 @@ class VectorStore:
             ]
 
         scored: list[tuple[int, str, dict]] = []
-        for doc in self._documents:
+        for doc in docs:
             content = doc.get("content", "")
             metadata = doc.get("metadata", {})
             content_lower = content.lower()
@@ -129,7 +170,7 @@ class VectorStore:
 
         if not scored:
             fallback = sorted(
-                self._documents,
+                docs,
                 key=lambda item: item.get("metadata", {}).get("modified_ns", 0),
                 reverse=True,
             )
@@ -142,21 +183,29 @@ class VectorStore:
         scored.sort(key=lambda item: item[0], reverse=True)
         return [(content, metadata) for _score, content, metadata in scored[:k]]
 
-    def similarity_search(self, query: str, k: int = 3) -> List[Tuple[str, dict]]:
+    def similarity_search(
+        self,
+        query: str,
+        k: int = 3,
+        rel_path_prefixes: list[str] | None = None,
+    ) -> List[Tuple[str, dict]]:
         """
         임베딩(있을 때) + 토큰 겹침 폴백/보강.
+        rel_path_prefixes: document 루트 기준 상대 경로 접두사(예: ["failure encyclopedia/"]).
+        None 이면 전체 스토어.
         """
         q = (query or "").strip()
+        candidates = self._candidate_documents(rel_path_prefixes)
         embed_results: List[Tuple[str, dict]] = []
-        if q and self._documents:
-            with_emb = [d for d in self._documents if d.get("embedding")]
+        if q and candidates:
+            with_emb = [d for d in candidates if d.get("embedding")]
             if with_emb:
                 from .openai_service import embed_query_text
 
                 qvec = embed_query_text(q)
                 if qvec and any(abs(x) > 1e-12 for x in qvec):
                     scored: list[tuple[float, str, dict]] = []
-                    for doc in self._documents:
+                    for doc in candidates:
                         ev = doc.get("embedding")
                         if not ev or len(ev) != len(qvec):
                             continue
@@ -167,7 +216,7 @@ class VectorStore:
                         (c, m) for s, c, m in scored[:k] if s > 0.0
                     ]
 
-        token_results = self._similarity_search_tokens(q, k)
+        token_results = self._similarity_search_tokens(q, k, candidates)
         if not embed_results:
             return token_results[:k]
 
