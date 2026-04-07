@@ -12,3 +12,8 @@ bcrypt>=4.0
 python-jose[cryptography]>=3.3.0
 email-validator>=2.0
 mcp>=1.2.0
+# RAG: PDF / Excel / PowerPoint 텍스트 추출
+pypdf>=4.0
+openpyxl>=3.1
+python-pptx>=1.0.0
+xlrd>=2.0.1

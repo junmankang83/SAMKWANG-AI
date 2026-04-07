@@ -1,0 +1,17 @@
+[Unit]
+Description=SAMKWANG AI edge (frontend static + API proxy on 8080)
+After=network.target samkwang-backend.service
+Requires=samkwang-backend.service
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c "set -a; [ -f '/home/user2/SAMKWANG AI/.env' ] && . '/home/user2/SAMKWANG AI/.env'; set +a; exec '/home/user2/SAMKWANG AI/backend/.venv/bin/python' '/home/user2/SAMKWANG AI/scripts/samkwang_edge_proxy.py' --listen 0.0.0.0:8080"
+Restart=on-failure
+RestartSec=5
+
+# journalctl -u samkwang-edge -f
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

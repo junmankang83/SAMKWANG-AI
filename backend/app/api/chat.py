@@ -47,12 +47,14 @@ async def chat_endpoint(
     tools_model = normalize_tools_chat_model(payload.model, settings.chat_tools_model)
 
     try:
+        rag_folder = payload.rag_folder
         if settings.erp_tools_enabled:
             answer, sources = await answer_question_with_erp_tools(
                 query=payload.message,
                 conversation_id=payload.conversation_id,
                 model=tools_model,
                 settings=settings,
+                rag_folder=rag_folder,
             )
             # 도구 루프가 실패하면 일반 RAG 채팅 경로로 한 번 더 시도
             if answer.startswith("채팅(도구 연동) 처리 중 오류"):
@@ -61,6 +63,7 @@ async def chat_endpoint(
                     conversation_id=payload.conversation_id,
                     model=model,
                     settings=settings,
+                    rag_folder=rag_folder,
                 )
         else:
             answer, sources = answer_question(
@@ -68,6 +71,7 @@ async def chat_endpoint(
                 conversation_id=payload.conversation_id,
                 model=model,
                 settings=settings,
+                rag_folder=rag_folder,
             )
     except Exception:
         logger.exception("채팅 처리 중 예외 (500 대신 응답 본문으로 안내)")

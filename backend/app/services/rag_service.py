@@ -1,6 +1,9 @@
 from pathlib import Path
 import hashlib
 import logging
+import shutil
+import subprocess
+import tempfile
 from typing import List, Tuple
 
 from ..config import Settings, resolved_documents_dir
@@ -58,6 +61,137 @@ TEXT_EXTENSIONS = {
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
 
 
+def _read_pdf(path: Path) -> str:
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        logger.warning("pypdf 미설치: PDF를 건너뜁니다.")
+        return ""
+    try:
+        reader = PdfReader(str(path))
+        parts: list[str] = []
+        for page in reader.pages:
+            t = page.extract_text() or ""
+            if t.strip():
+                parts.append(t)
+        return "\n\n".join(parts)
+    except Exception:
+        logger.exception("PDF 파싱 실패: %s", path.name)
+        return ""
+
+
+def _read_xlsx(path: Path) -> str:
+    try:
+        from openpyxl import load_workbook
+    except ImportError:
+        logger.warning("openpyxl 미설치: Excel을 건너뜁니다.")
+        return ""
+    try:
+        wb = load_workbook(path, read_only=True, data_only=True)
+        lines: list[str] = []
+        try:
+            for sheet in wb.worksheets:
+                lines.append(f"## {sheet.title}")
+                for row in sheet.iter_rows(values_only=True):
+                    cells = [str(c) if c is not None else "" for c in row]
+                    if any(x.strip() for x in cells):
+                        lines.append("\t".join(cells))
+        finally:
+            wb.close()
+        return "\n".join(lines)
+    except Exception:
+        logger.exception("Excel 파싱 실패: %s", path.name)
+        return ""
+
+
+def _read_xls(path: Path) -> str:
+    try:
+        import xlrd
+    except ImportError:
+        logger.warning("xlrd 미설치: .xls를 건너뜁니다.")
+        return ""
+    try:
+        book = xlrd.open_workbook(str(path))
+        lines: list[str] = []
+        for sheet in book.sheets():
+            lines.append(f"## {sheet.name}")
+            for r in range(sheet.nrows):
+                row = sheet.row(r)
+                cells = [str(c.value) if c.value != "" else "" for c in row]
+                if any(x.strip() for x in cells):
+                    lines.append("\t".join(cells))
+        return "\n".join(lines)
+    except Exception:
+        logger.exception("XLS 파싱 실패: %s", path.name)
+        return ""
+
+
+def _read_pptx(path: Path) -> str:
+    try:
+        from pptx import Presentation
+    except ImportError:
+        logger.warning("python-pptx 미설치: PPTX를 건너뜁니다.")
+        return ""
+    try:
+        prs = Presentation(str(path))
+        parts: list[str] = []
+        for i, slide in enumerate(prs.slides, 1):
+            parts.append(f"## Slide {i}")
+            for shape in slide.shapes:
+                if hasattr(shape, "text") and shape.text and shape.text.strip():
+                    parts.append(shape.text.strip())
+                if getattr(shape, "has_table", False):
+                    tbl = shape.table
+                    for row in tbl.rows:
+                        cells = [c.text.strip() for c in row.cells]
+                        if any(cells):
+                            parts.append("\t".join(cells))
+        return "\n\n".join(parts)
+    except Exception:
+        logger.exception("PPTX 파싱 실패: %s", path.name)
+        return ""
+
+
+def _read_ppt_libreoffice(path: Path) -> str:
+    """
+    레거시 .ppt는 python-pptx로 읽을 수 없음. LibreOffice가 있으면 txt로 변환해 텍스트를 얻는다.
+    """
+    bin_path = shutil.which("soffice") or shutil.which("libreoffice")
+    if not bin_path:
+        return ""
+    try:
+        with tempfile.TemporaryDirectory(prefix="samkwang_ppt_") as td:
+            td_path = Path(td)
+            src = path.resolve()
+            subprocess.run(
+                [
+                    bin_path,
+                    "--headless",
+                    "--nologo",
+                    "--nofirststartwizard",
+                    "--convert-to",
+                    "txt:Text",
+                    "--outdir",
+                    td,
+                    str(src),
+                ],
+                check=False,
+                timeout=120,
+                capture_output=True,
+            )
+            out = td_path / (path.stem + ".txt")
+            if not out.is_file():
+                txts = sorted(td_path.glob("*.txt"))
+                if len(txts) == 1:
+                    out = txts[0]
+                else:
+                    return ""
+            return out.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        logger.exception("LibreOffice로 .ppt 변환 실패: %s", path.name)
+        return ""
+
+
 def _read_document_content(path: Path) -> str:
     """
     문서 내용을 텍스트로 읽는다.
@@ -70,6 +204,22 @@ def _read_document_content(path: Path) -> str:
     suffix = path.suffix.lower()
     if suffix in IMAGE_EXTENSIONS:
         return extract_text_from_image(path)
+    if suffix == ".pdf":
+        return _read_pdf(path)
+    if suffix in (".xlsx", ".xlsm"):
+        return _read_xlsx(path)
+    if suffix == ".xls":
+        return _read_xls(path)
+    if suffix == ".pptx":
+        return _read_pptx(path)
+    if suffix == ".ppt":
+        text = _read_ppt_libreoffice(path)
+        if not text.strip():
+            logger.info(
+                "레거시 .ppt 텍스트 추출 실패(빈 결과). LibreOffice 설치 또는 .pptx 변환을 권장: %s",
+                path.name,
+            )
+        return text
     if suffix not in TEXT_EXTENSIONS:
         return ""
 
@@ -230,6 +380,27 @@ def sync_documents_folder(settings: Settings) -> dict:
     }
 
 
+def resolved_rag_folder_prefix(raw: str | None, settings: Settings) -> str | None:
+    """
+    클라이언트가 보낸 rag_folder 문자열을 document 루트 기준 안전한 상대 경로로 정규화한다.
+    None·빈 문자열·비정상 경로면 None (문서 검색 생략).
+    """
+    if raw is None:
+        return None
+    s = str(raw).strip().replace("\\", "/").strip("/")
+    if not s:
+        return None
+    if ".." in Path(s).parts:
+        return None
+    root = resolved_documents_dir(settings).resolve()
+    try:
+        target = (root / s).resolve()
+        target.relative_to(root)
+    except ValueError:
+        return None
+    return s
+
+
 def rag_scope_rel_path_prefixes(query: str, settings: Settings) -> list[str]:
     """질문에 맞는 document 하위 폴더 접두사 1개를 반환(리스트)."""
     q = (query or "").strip()
@@ -243,67 +414,46 @@ def rag_scope_rel_path_prefixes(query: str, settings: Settings) -> list[str]:
     return [settings.rag_knowledge_subdir]
 
 
-def rag_scope_label(query: str, settings: Settings) -> str:
-    prefs = rag_scope_rel_path_prefixes(query, settings)
-    if prefs[0].strip().lower() == settings.rag_failure_subdir.strip().lower():
-        return "불량 백과(failure encyclopedia)"
-    if prefs[0].strip().lower() == settings.rag_rules_subdir.strip().lower():
-        return "회사 규정(companyrule)"
-    return "일반 지식(knowledge)"
-
-
 def retrieve_matches_for_chat(
     query: str,
     settings: Settings,
     k: int = 5,
+    rag_folder: str | None = None,
 ) -> tuple[list[tuple[str, dict]], str]:
     """
-    스코프 폴더 우선 검색 후 결과가 부족하면 전체 스토어로 보충한다.
+    rag_folder 가 유효하면 해당 document 하위 폴더만 검색한다.
+    미지정이면 벡터 검색을 하지 않고 빈 결과를 반환한다(일반 LLM 답변용).
     """
     store = load_vector_store(settings.vector_db_path)
-    scope_label = rag_scope_label(query, settings)
-    prefixes = rag_scope_rel_path_prefixes(query, settings)
-    primary = store.similarity_search(query, k=k, rel_path_prefixes=prefixes)
-    if len(primary) >= k:
+    forced = resolved_rag_folder_prefix(rag_folder, settings)
+    if forced is not None:
+        scope_label = f"선택 문서 폴더: {forced}"
+        prefixes = [forced]
+        primary = store.similarity_search(query, k=k, rel_path_prefixes=prefixes)
         return primary[:k], scope_label
 
-    seen: set[str] = set()
-    for _c, m in primary:
-        dk = str(m.get("doc_key", ""))
-        if dk:
-            seen.add(dk)
-
-    need = k - len(primary)
-    if need <= 0:
-        return primary, scope_label
-
-    filler = store.similarity_search(query, k=k * 2, rel_path_prefixes=None)
-    merged = list(primary)
-    for c, m in filler:
-        dk = str(m.get("doc_key", ""))
-        if dk and dk in seen:
-            continue
-        if dk:
-            seen.add(dk)
-        merged.append((c, m))
-        if len(merged) >= k:
-            break
-    return merged[:k], scope_label
+    # 폴더 미지정(도구「자동」): 벡터 검색·문서 컨텍스트 없이 LLM 일반 답변만 사용
+    return [], "문서 검색 없음"
 
 
-def answer_question(query: str, conversation_id: str | None, model: str, settings: Settings) -> Tuple[str, List[str]]:
-    matches, scope_label = retrieve_matches_for_chat(query, settings, k=5)
+def answer_question(
+    query: str,
+    conversation_id: str | None,
+    model: str,
+    settings: Settings,
+    rag_folder: str | None = None,
+) -> Tuple[str, List[str]]:
+    matches, scope_label = retrieve_matches_for_chat(query, settings, k=5, rag_folder=rag_folder)
+    print(f"[RAG Service] 요청된 모델: {model}")
     if matches:
         context = "\n---\n".join(doc for doc, _meta in matches)
+        prompt = (
+            f"Conversation: {conversation_id or 'new'}\n\n"
+            f"검색 우선 영역: {scope_label}\n\n"
+            f"Context:\n{context}\n\nQuestion:\n{query}"
+        )
     else:
-        context = "No context available."
-
-    prompt = (
-        f"Conversation: {conversation_id or 'new'}\n\n"
-        f"검색 우선 영역: {scope_label}\n\n"
-        f"Context:\n{context}\n\nQuestion:\n{query}"
-    )
-    print(f"[RAG Service] 요청된 모델: {model}")
+        prompt = f"Conversation: {conversation_id or 'new'}\n\nQuestion:\n{query}"
     answer = generate_chat_completion(prompt, model=model)
     references = [meta.get("filename", "unknown") for _doc, meta in matches]
     return answer, references

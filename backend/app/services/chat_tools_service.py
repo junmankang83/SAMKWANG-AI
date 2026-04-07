@@ -32,16 +32,13 @@ async def answer_question_with_erp_tools(
     conversation_id: str | None,
     model: str | None,
     settings: Settings,
+    rag_folder: str | None = None,
 ) -> Tuple[str, List[str]]:
     """
     RAG 유사도 검색 후, ERP MCP 도구를 호출할 수 있는 채팅 완성 루프.
     """
     logger.debug("요청 모델=%s (도구 루프 실제 사용=%s)", model, settings.chat_tools_model)
-    matches, scope_label = retrieve_matches_for_chat(query, settings, k=5)
-    if matches:
-        context = "\n---\n".join(doc for doc, _meta in matches)
-    else:
-        context = "No context available."
+    matches, scope_label = retrieve_matches_for_chat(query, settings, k=5, rag_folder=rag_folder)
     references = [meta.get("filename", "unknown") for _doc, meta in matches]
 
     # 프론트에서 선택한 모델로 Chat Completions(+tools). 비어 있으면 CHAT_TOOLS_MODEL
@@ -50,11 +47,15 @@ async def answer_question_with_erp_tools(
     logger.info("OpenAI 채팅(도구) 호출 모델: %s", tools_model)
     client = _build_openai_client(settings)
 
-    user_blob = (
-        f"Conversation: {conversation_id or 'new'}\n\n"
-        f"검색 우선 영역: {scope_label}\n\n"
-        f"문서 컨텍스트:\n{context}\n\n사용자 질문:\n{query}"
-    )
+    if matches:
+        context = "\n---\n".join(doc for doc, _meta in matches)
+        user_blob = (
+            f"Conversation: {conversation_id or 'new'}\n\n"
+            f"검색 우선 영역: {scope_label}\n\n"
+            f"문서 컨텍스트:\n{context}\n\n사용자 질문:\n{query}"
+        )
+    else:
+        user_blob = f"Conversation: {conversation_id or 'new'}\n\n사용자 질문:\n{query}"
 
     messages: list = [
         {

@@ -322,6 +322,228 @@
       flex-shrink: 0;
     }
     .composer-plus:hover { background: #f4f4f4; color: var(--text); }
+    .composer-tools-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .composer-tools-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: auto;
+      min-height: 36px;
+      padding: 5px 12px 5px 10px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: #f6f6f8;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      white-space: nowrap;
+      max-width: min(42vw, 200px);
+    }
+    .composer-tools-icons {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .composer-tools-icon-stack {
+      position: relative;
+      display: block;
+      width: 22px;
+      height: 22px;
+      color: #15803d;
+    }
+    .composer-tools-icon-stack .rag-svg-folder {
+      width: 22px;
+      height: 22px;
+      display: block;
+    }
+    .composer-tools-icon-stack .rag-svg-link-wrap {
+      position: absolute;
+      right: -3px;
+      bottom: -2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid #bbf7d0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #15803d;
+    }
+    .composer-tools-icon-stack .rag-svg-link {
+      width: 10px;
+      height: 10px;
+      display: block;
+    }
+    .composer-tools-labels {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+      min-width: 0;
+      text-align: left;
+    }
+    .composer-tools-name {
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .composer-tools-path {
+      font-size: 10px;
+      font-weight: 600;
+      color: #15803d;
+      line-height: 1.2;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .composer-tools-path--muted {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .composer-tools-btn:hover {
+      background: #ececf0;
+    }
+    .composer-tools-btn[aria-expanded="true"] {
+      border-color: #15803d;
+      color: #15803d;
+      background: #f0fdf4;
+    }
+    .rag-tools-popover {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 0;
+      min-width: 240px;
+      max-width: min(92vw, 320px);
+      max-height: min(50vh, 280px);
+      overflow: auto;
+      padding: 8px 0;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+      z-index: 50;
+    }
+    .rag-tools-popover-head {
+      padding: 6px 14px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .rag-tools-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .rag-tools-list .rag-tools-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+      padding: 10px 14px;
+      border: none;
+      background: transparent;
+      font: inherit;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .rag-tools-list .rag-tools-row:hover,
+    .rag-tools-list .rag-tools-row:focus {
+      background: #f4f4f5;
+      outline: none;
+    }
+    .rag-tools-list .rag-tools-row.is-active {
+      background: #ecfdf5;
+    }
+    .rag-tools-list .rag-tools-row.is-active .rag-tools-row-title {
+      color: #15803d;
+    }
+    .rag-tools-list .rag-tools-section {
+      list-style: none;
+      padding: 8px 14px 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      pointer-events: none;
+    }
+    .rag-tools-row-icons {
+      flex-shrink: 0;
+      width: 28px;
+      height: 26px;
+      position: relative;
+      color: #166534;
+    }
+    .rag-tools-row-icons .rag-svg-folder {
+      width: 24px;
+      height: 24px;
+      display: block;
+    }
+    .rag-tools-row-icons .rag-svg-link-wrap {
+      position: absolute;
+      right: -2px;
+      bottom: -1px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid #bbf7d0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #15803d;
+    }
+    .rag-tools-row-icons .rag-svg-link {
+      width: 9px;
+      height: 9px;
+      display: block;
+    }
+    .rag-tools-row-body {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .rag-tools-row-title {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+    .rag-tools-row-sub {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+    .rag-tools-row.is-active .rag-tools-row-sub {
+      color: #166534;
+    }
+    .rag-tools-list .rag-tools-muted {
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: default;
+      padding: 10px 14px;
+    }
+    .composer-rag-hint {
+      text-align: center;
+      font-size: 11px;
+      color: #15803d;
+      margin-top: 6px;
+      min-height: 1.2em;
+      padding: 0 8px;
+    }
     .composer-pill input {
       flex: 1;
       min-width: 0;
@@ -507,6 +729,19 @@
     .doc-tree-folder-li {
       margin: 2px 0;
     }
+    .doc-tree-folder-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .doc-tree-folder-row .doc-tree-folder {
+      flex: 1;
+      min-width: 0;
+    }
+    .doc-tree-folder-row > .doc-delete {
+      margin-top: 4px;
+    }
     .doc-tree-folder {
       border: none;
     }
@@ -522,7 +757,7 @@
     .doc-tree-summary--row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 8px;
       flex-wrap: wrap;
     }
@@ -674,6 +909,73 @@
       margin: 0 2px 0 0;
       flex-shrink: 0;
     }
+    .doc-upload-status-wrap {
+      margin-top: 12px;
+      min-height: 2.75em;
+    }
+    .doc-upload-status-line {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--muted, #71717a);
+      line-height: 1.45;
+      word-break: break-word;
+    }
+    .doc-upload-status-line:first-child {
+      margin-top: 0;
+    }
+    .doc-upload-progress {
+      font-weight: 600;
+      color: #15803d;
+    }
+    .doc-upload-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .doc-upload-dot {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      transform-origin: center center;
+      animation: docUploadDotPulse 0.9s ease-in-out infinite;
+    }
+    .doc-upload-dot:nth-child(1) {
+      animation-delay: 0s;
+    }
+    .doc-upload-dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+    .doc-upload-dot:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+    @keyframes docUploadDotPulse {
+      0%,
+      100% {
+        transform: scale(0.55);
+        opacity: 0.55;
+      }
+      50% {
+        transform: scale(1.25);
+        opacity: 1;
+      }
+    }
+    .modal-root.doc-modal-uploading .modal-body {
+      opacity: 0.88;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+    }
+    .modal-root.doc-modal-uploading .modal-head .modal-x {
+      pointer-events: none;
+      opacity: 0.45;
+      cursor: default;
+    }
+    .modal-root.doc-modal-uploading .modal-backdrop {
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -727,6 +1029,38 @@
       <div class="composer-inner">
         <div class="composer-pill">
           <button type="button" class="composer-plus" id="plusBtn" title="추가" aria-label="추가">+</button>
+          <div class="composer-tools-wrap">
+            <button
+              type="button"
+              class="composer-tools-btn"
+              id="ragToolsBtn"
+              title="RAG 폴더 연동"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-controls="ragToolsPopover"
+            >
+              <span class="composer-tools-icons" aria-hidden="true">
+                <span class="composer-tools-icon-stack">
+                  <svg class="rag-svg-folder" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                  </svg>
+                  <span class="rag-svg-link-wrap">
+                    <svg class="rag-svg-link" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M10 13a5 5 0 007.54.54l1.5-1.5a5 5 0 00-7.07-7.07L9.9 6.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                      <path d="M14 11a5 5 0 00-7.54-.54l-1.5 1.5a5 5 0 007.07 7.07L14.1 17.9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                </span>
+              </span>
+              <span class="composer-tools-labels">
+                <span class="composer-tools-name">도구</span>
+                <span id="ragToolsPathLine" class="composer-tools-path composer-tools-path--muted">자동</span>
+              </span>
+            </button>
+            <div id="ragToolsPopover" class="rag-tools-popover" hidden role="listbox" aria-label="RAG 검색 폴더">
+              <ul id="ragToolsList" class="rag-tools-list"></ul>
+            </div>
+          </div>
           <input id="input" type="text" placeholder="무엇이든 물어보세요" autocomplete="off" />
           <button type="button" class="composer-send" id="send" title="전송" aria-label="전송">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="20" height="20">
@@ -734,6 +1068,7 @@
             </svg>
           </button>
         </div>
+        <p id="ragFolderHint" class="composer-rag-hint" hidden></p>
         <p class="composer-hint">SAMKWANG AI는 참고 문서와 선택한 모델을 사용합니다. 잘못된 응답이 있을 수 있으니 중요한 정보는 확인하세요.</p>
       </div>
     </div>
@@ -768,6 +1103,36 @@
     const docModalTitle = document.getElementById("docModalTitle");
     const docModalClose = document.getElementById("docModalClose");
     const docModalBackdrop = document.getElementById("docModalBackdrop");
+    const ragToolsBtn = document.getElementById("ragToolsBtn");
+    const ragToolsPopover = document.getElementById("ragToolsPopover");
+    const ragToolsList = document.getElementById("ragToolsList");
+    const ragFolderHint = document.getElementById("ragFolderHint");
+
+    let selectedRagFolder = "";
+    let ragFoldersFetched = false;
+    let ragFoldersCache = [];
+    let docSearchModalDelegationBound = false;
+
+    /** API·경로는 영문(또는 디스크 기준), UI 표시만 한글(기본 폴더명 매핑) */
+    const RAG_FOLDER_DISPLAY = {
+      companyrule: "사내규정",
+      knowledge: "사내지식",
+      "failure encyclopedia": "품질백과",
+    };
+    function ragFolderDisplayName(rel) {
+      if (rel == null || rel === "") return "자동";
+      const key = String(rel).trim();
+      if (RAG_FOLDER_DISPLAY[key]) return RAG_FOLDER_DISPLAY[key];
+      const lower = key.toLowerCase();
+      for (var k in RAG_FOLDER_DISPLAY) {
+        if (k.toLowerCase() === lower) return RAG_FOLDER_DISPLAY[k];
+      }
+      return key;
+    }
+
+    function setDocModalUploading(active) {
+      if (docModal) docModal.classList.toggle("doc-modal-uploading", !!active);
+    }
 
     function createConversationId() {
       // 일부 브라우저/HTTP 환경에서는 crypto.randomUUID()가 없을 수 있음
@@ -840,6 +1205,11 @@
       refreshDocTools();
       if (!accessToken) {
         loginUser = "";
+        selectedRagFolder = "";
+        ragFoldersCache = [];
+        updateRagFolderHint();
+        updateRagToolsBtnAppearance();
+        closeRagToolsPopover();
         updateAuthButton();
         refreshDocTools();
         return;
@@ -854,11 +1224,18 @@
         if (loginUser) localStorage.setItem("samkwang_username", loginUser);
         isAdminUser = !!me.is_admin;
         authVerified = true;
+        ragFoldersFetched = false;
       } catch (_e) {
         accessToken = "";
         loginUser = "";
         authVerified = false;
         isAdminUser = false;
+        selectedRagFolder = "";
+        ragFoldersCache = [];
+        ragFoldersFetched = false;
+        updateRagFolderHint();
+        updateRagToolsBtnAppearance();
+        closeRagToolsPopover();
         localStorage.removeItem("samkwang_access_token");
         localStorage.removeItem("samkwang_username");
       }
@@ -885,6 +1262,196 @@
       if (accessToken) h["Authorization"] = "Bearer " + accessToken;
       return h;
     }
+
+    function authHeadersForGet() {
+      const h = {};
+      if (accessToken) h["Authorization"] = "Bearer " + accessToken;
+      return h;
+    }
+
+    function ragToolsRowIconsHtml() {
+      return (
+        '<span class="rag-tools-row-icons" aria-hidden="true">' +
+        '<svg class="rag-svg-folder" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>' +
+        "</svg>" +
+        '<span class="rag-svg-link-wrap">' +
+        '<svg class="rag-svg-link" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M10 13a5 5 0 007.54.54l1.5-1.5a5 5 0 00-7.07-7.07L9.9 6.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>' +
+        '<path d="M14 11a5 5 0 00-7.54-.54l-1.5 1.5a5 5 0 007.07 7.07L14.1 17.9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>' +
+        "</svg></span></span>"
+      );
+    }
+
+    function updateRagToolsBtnAppearance() {
+      const pathEl = document.getElementById("ragToolsPathLine");
+      if (!ragToolsBtn || !pathEl) return;
+      if (!selectedRagFolder) {
+        pathEl.textContent = "자동";
+        pathEl.classList.add("composer-tools-path--muted");
+        ragToolsBtn.setAttribute(
+          "title",
+          "자동: 업로드 문서를 검색하지 않고 LLM만 사용"
+        );
+      } else {
+        pathEl.textContent = ragFolderDisplayName(selectedRagFolder);
+        pathEl.classList.remove("composer-tools-path--muted");
+        ragToolsBtn.setAttribute(
+          "title",
+          "RAG: " +
+            ragFolderDisplayName(selectedRagFolder) +
+            " 폴더의 문서만 검색·참고"
+        );
+      }
+    }
+
+    function updateRagFolderHint() {
+      if (!ragFolderHint) return;
+      if (!selectedRagFolder) {
+        ragFolderHint.hidden = true;
+        ragFolderHint.textContent = "";
+        return;
+      }
+      ragFolderHint.textContent =
+        "RAG 검색: " +
+        ragFolderDisplayName(selectedRagFolder) +
+        " (이 폴더 안의 파일만 참고)";
+      ragFolderHint.hidden = false;
+    }
+
+    function closeRagToolsPopover() {
+      if (!ragToolsPopover || !ragToolsBtn) return;
+      ragToolsPopover.hidden = true;
+      ragToolsBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function setRagFolderSelection(value) {
+      selectedRagFolder = value == null ? "" : String(value);
+      updateRagFolderHint();
+      updateRagToolsBtnAppearance();
+      if (ragToolsPopover && !ragToolsPopover.hidden) {
+        renderRagToolsList(ragFoldersCache, null);
+      }
+    }
+
+    function renderRagToolsList(folders, loginRequiredMsg) {
+      if (!ragToolsList) return;
+      ragToolsList.innerHTML = "";
+      if (loginRequiredMsg) {
+        const li = document.createElement("li");
+        li.className = "rag-tools-muted";
+        li.textContent = loginRequiredMsg;
+        ragToolsList.appendChild(li);
+        return;
+      }
+      const autoLi = document.createElement("li");
+      const autoBtn = document.createElement("button");
+      autoBtn.type = "button";
+      autoBtn.className = "rag-tools-row";
+      autoBtn.setAttribute("role", "option");
+      autoBtn.dataset.folder = "";
+      autoBtn.innerHTML =
+        ragToolsRowIconsHtml() +
+        '<span class="rag-tools-row-body">' +
+        '<span class="rag-tools-row-title">자동</span>' +
+        '<span class="rag-tools-row-sub">일반 답변 · 업로드 문서 검색 안 함</span>' +
+        "</span>";
+      if (!selectedRagFolder) autoBtn.classList.add("is-active");
+      autoBtn.addEventListener("click", function () {
+        setRagFolderSelection("");
+        closeRagToolsPopover();
+      });
+      autoLi.appendChild(autoBtn);
+      ragToolsList.appendChild(autoLi);
+
+      const sectionLi = document.createElement("li");
+      sectionLi.className = "rag-tools-section";
+      sectionLi.setAttribute("aria-hidden", "true");
+      sectionLi.textContent = "문서 검색 (RAG)";
+      ragToolsList.appendChild(sectionLi);
+
+      const sorted = (folders || []).slice().sort(function (a, b) {
+        return String(a).localeCompare(String(b), "ko");
+      });
+      for (let i = 0; i < sorted.length; i++) {
+        const rel = sorted[i];
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rag-tools-row";
+        btn.setAttribute("role", "option");
+        btn.dataset.folder = rel;
+        btn.innerHTML =
+          ragToolsRowIconsHtml() +
+          '<span class="rag-tools-row-body">' +
+          '<span class="rag-tools-row-title">' +
+          escapeHtml(ragFolderDisplayName(rel)) +
+          "</span>" +
+          '<span class="rag-tools-row-sub">이 폴더의 문서만 검색·참고</span>' +
+          "</span>";
+        if (selectedRagFolder === rel) btn.classList.add("is-active");
+        btn.addEventListener("click", function () {
+          setRagFolderSelection(rel);
+          closeRagToolsPopover();
+        });
+        li.appendChild(btn);
+        ragToolsList.appendChild(li);
+      }
+    }
+
+    async function ensureRagFoldersLoaded() {
+      if (!accessToken) {
+        renderRagToolsList([], "로그인 후 문서 폴더를 선택할 수 있습니다.");
+        return;
+      }
+      if (ragFoldersFetched) {
+        renderRagToolsList(ragFoldersCache, null);
+        return;
+      }
+      try {
+        const r = await fetch("/api/documents/rag-folders", {
+          headers: authHeadersForGet(),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          throw new Error(data.detail ? String(data.detail) : "폴더 목록을 불러오지 못했습니다");
+        }
+        ragFoldersCache = data.folders || [];
+        ragFoldersFetched = true;
+        renderRagToolsList(ragFoldersCache, null);
+      } catch (e) {
+        ragFoldersFetched = false;
+        renderRagToolsList([], String(e.message || e));
+      }
+    }
+
+    function toggleRagToolsPopover() {
+      if (!ragToolsPopover || !ragToolsBtn) return;
+      const open = ragToolsPopover.hidden;
+      if (open) {
+        ragToolsPopover.hidden = false;
+        ragToolsBtn.setAttribute("aria-expanded", "true");
+        void ensureRagFoldersLoaded();
+      } else {
+        closeRagToolsPopover();
+      }
+    }
+
+    if (ragToolsBtn) {
+      ragToolsBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleRagToolsPopover();
+      });
+    }
+    document.addEventListener("click", function (e) {
+      if (!ragToolsPopover || ragToolsPopover.hidden) return;
+      const t = e.target;
+      if (ragToolsBtn && ragToolsBtn.contains(t)) return;
+      if (ragToolsPopover.contains(t)) return;
+      closeRagToolsPopover();
+    });
+
+    updateRagToolsBtnAppearance();
 
     function requireAdminForDocs() {
       if (!accessToken || !authVerified) {
@@ -944,14 +1511,49 @@
 
     docFileInput.addEventListener("change", async () => {
       if (!accessToken || !docFileInput.files || !docFileInput.files.length) return;
+
+      const pickBtn = document.getElementById("docPickFiles");
+      const createFolderBtn = document.getElementById("docCreateFolder");
       const st = document.getElementById("docUploadStatus");
+      const prog = document.getElementById("docUploadProgress");
+      const progMain = document.getElementById("docUploadProgressMain");
+      const dotsEl = document.getElementById("docUploadDots");
+
       const folderVal = getSelectedUploadFolderValue();
+      const files = Array.from(docFileInput.files);
+      const total = files.length;
       const names = [];
-      for (const file of docFileInput.files) {
-        const fd = new FormData();
-        fd.append("file", file, file.name);
-        if (folderVal) fd.append("folder", folderVal);
-        try {
+
+      if (st) st.textContent = "";
+      if (prog) prog.hidden = false;
+      if (progMain) {
+        progMain.textContent =
+          total > 1 ? "업로드 준비 중 (" + total + "개 파일)" : "업로드 준비 중";
+      }
+      if (dotsEl) dotsEl.hidden = false;
+
+      if (pickBtn) pickBtn.disabled = true;
+      if (createFolderBtn) createFolderBtn.disabled = true;
+      setDocModalUploading(true);
+
+      await new Promise(function (resolve) {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(resolve);
+        });
+      });
+
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (progMain) {
+            progMain.textContent =
+              total > 1
+                ? "파일 " + (i + 1) + "/" + total + " — " + file.name
+                : "업로드 중 — " + file.name;
+          }
+          const fd = new FormData();
+          fd.append("file", file, file.name);
+          if (folderVal) fd.append("folder", folderVal);
           const r = await fetch("/api/documents/upload", {
             method: "POST",
             headers: { Authorization: "Bearer " + accessToken },
@@ -962,18 +1564,37 @@
             throw new Error(data.detail ? String(data.detail) : "업로드 실패 (" + r.status + ")");
           }
           names.push(data.path || data.filename || file.name);
-          if (st) st.textContent = "업로드 중: " + names.join(", ");
-        } catch (e) {
-          if (st) st.textContent = String(e.message || e);
-          addMessage("assistant", "문서 등록 오류: " + String(e.message || e));
-          docFileInput.value = "";
-          return;
         }
+
+        if (dotsEl) dotsEl.hidden = true;
+        if (progMain) progMain.textContent = "등록 완료";
+        docFileInput.value = "";
+
+        const listStr = names.join(", ");
+        addMessage("user", "문서를 업로드했습니다: " + listStr);
+        addMessage(
+          "assistant",
+          "등록이 완료되었습니다. RAG 검색에 반영되었습니다. 해당 문서를 기준으로 질문해 보세요."
+        );
+
+        setTimeout(function () {
+          if (pickBtn) pickBtn.disabled = false;
+          if (createFolderBtn) createFolderBtn.disabled = false;
+          setDocModalUploading(false);
+          if (prog) prog.hidden = true;
+          closeDocModal();
+        }, 520);
+      } catch (e) {
+        if (dotsEl) dotsEl.hidden = true;
+        if (progMain) progMain.textContent = "";
+        if (prog) prog.hidden = true;
+        if (st) st.textContent = String(e.message || e);
+        addMessage("assistant", "문서 등록 오류: " + String(e.message || e));
+        docFileInput.value = "";
+        if (pickBtn) pickBtn.disabled = false;
+        if (createFolderBtn) createFolderBtn.disabled = false;
+        setDocModalUploading(false);
       }
-      docFileInput.value = "";
-      if (st) st.textContent = "완료: " + names.join(", ");
-      addMessage("assistant", "문서가 등록되었습니다: " + names.join(", "));
-      setTimeout(closeDocModal, 600);
     });
 
     btnDocSearch.addEventListener("click", async () => {
@@ -1044,15 +1665,15 @@
         const name = dirNames[i];
         const fullFolder = prefix ? prefix + "/" + name : name;
         html +=
-          '<li class="doc-tree-folder-li"><details class="doc-tree-folder" open><summary class="doc-tree-summary doc-tree-summary--row">' +
+          '<li class="doc-tree-folder-li"><div class="doc-tree-folder-row"><details class="doc-tree-folder" open><summary class="doc-tree-summary doc-tree-summary--row">' +
           '<span class="doc-tree-summary-left"><span class="doc-tree-folder-icon" aria-hidden="true">📁</span><span>' +
           escapeHtml(name) +
-          "</span></span>" +
-          '<button type="button" class="doc-delete" data-kind="folder" data-path="' +
-          escapeHtml(fullFolder) +
-          '">삭제</button></summary>';
+          "</span></span></summary>";
         html += renderDocTreeHtml(node.dirs[name], fullFolder);
-        html += "</details></li>";
+        html +=
+          '</details><button type="button" class="doc-delete" data-kind="folder" data-path="' +
+          escapeHtml(fullFolder) +
+          '">삭제</button></div></li>';
       }
       for (let j = 0; j < files.length; j++) {
         const f = files[j];
@@ -1115,48 +1736,22 @@
         renderDocTreeHtml(tree, "") +
         "</div>";
       docModalBody.innerHTML = html;
-      bindDocSearchModalActions();
     }
 
-    function bindDocSearchModalActions() {
-      docModalBody.querySelectorAll(".doc-open").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const path = btn.getAttribute("data-path");
-          if (!path) return;
-          try {
-            const dr = await fetch(
-              "/api/documents/file?path=" + encodeURIComponent(path),
-              { headers: { Authorization: "Bearer " + accessToken } }
-            );
-            if (!dr.ok) {
-              const raw = await dr.text().catch(() => "");
-              let detail = "";
-              try {
-                detail = JSON.parse(raw || "{}").detail || "";
-                if (Array.isArray(detail)) detail = docSearchApiDetail({ detail: detail });
-                else if (typeof detail !== "string") detail = String(detail);
-              } catch (_e) {
-                detail = raw ? raw.slice(0, 160) : "";
-              }
-              throw new Error(
-                detail ? "열기 실패 (" + dr.status + "): " + detail : "열기 실패 (" + dr.status + ")"
-              );
-            }
-            const blob = await dr.blob();
-            const url = URL.createObjectURL(blob);
-            window.open(url, "_blank", "noopener,noreferrer");
-            setTimeout(() => URL.revokeObjectURL(url), 60_000);
-          } catch (e) {
-            alert(String(e.message || e));
-          }
-        });
+    function ensureDocSearchModalDelegation() {
+      if (docSearchModalDelegationBound || !docModalBody) return;
+      docSearchModalDelegationBound = true;
+      docModalBody.addEventListener("mousedown", function (ev) {
+        const t = ev.target.closest(".doc-delete, .doc-open");
+        if (t) ev.stopPropagation();
       });
-      docModalBody.querySelectorAll(".doc-delete").forEach((btn) => {
-        btn.addEventListener("click", async (ev) => {
+      docModalBody.addEventListener("click", async function (ev) {
+        const delBtn = ev.target.closest(".doc-delete");
+        if (delBtn) {
           ev.preventDefault();
           ev.stopPropagation();
-          const p = btn.getAttribute("data-path");
-          const kind = btn.getAttribute("data-kind") || "file";
+          const p = delBtn.getAttribute("data-path");
+          const kind = delBtn.getAttribute("data-kind") || "file";
           if (!p) return;
           const msg =
             kind === "folder"
@@ -1164,9 +1759,10 @@
               : "파일 \"" + p + "\" 을(를) 삭제할까요?";
           if (!confirm(msg)) return;
           try {
-            const dr = await fetch("/api/documents/item?path=" + encodeURIComponent(p), {
-              method: "DELETE",
-              headers: { Authorization: "Bearer " + accessToken },
+            const dr = await fetch("/api/documents/item/delete", {
+              method: "POST",
+              headers: authHeadersJson(),
+              body: JSON.stringify({ path: p }),
             });
             const delData = await dr.json().catch(() => ({}));
             if (!dr.ok) {
@@ -1178,9 +1774,43 @@
           } catch (e) {
             alert(String(e.message || e));
           }
-        });
+          return;
+        }
+        const openBtn = ev.target.closest(".doc-open");
+        if (!openBtn) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        const path = openBtn.getAttribute("data-path");
+        if (!path) return;
+        try {
+          const dr = await fetch(
+            "/api/documents/file?path=" + encodeURIComponent(path),
+            { headers: { Authorization: "Bearer " + accessToken } }
+          );
+          if (!dr.ok) {
+            const raw = await dr.text().catch(() => "");
+            let detail = "";
+            try {
+              detail = JSON.parse(raw || "{}").detail || "";
+              if (Array.isArray(detail)) detail = docSearchApiDetail({ detail: detail });
+              else if (typeof detail !== "string") detail = String(detail);
+            } catch (_e) {
+              detail = raw ? raw.slice(0, 160) : "";
+            }
+            throw new Error(
+              detail ? "열기 실패 (" + dr.status + "): " + detail : "열기 실패 (" + dr.status + ")"
+            );
+          }
+          const blob = await dr.blob();
+          const url = URL.createObjectURL(blob);
+          window.open(url, "_blank", "noopener,noreferrer");
+          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        } catch (e) {
+          alert(String(e.message || e));
+        }
       });
     }
+    ensureDocSearchModalDelegation();
 
     function getSelectedUploadFolderValue() {
       const el = document.querySelector('input[name="docUploadDest"]:checked');
@@ -1297,7 +1927,15 @@
         '<div class="modal-actions" style="margin-top:12px">' +
         '<button type="button" class="modal-btn primary" id="docPickFiles">파일 선택</button>' +
         "</div>" +
-        '<p id="docUploadStatus" class="doc-muted" style="margin-top:12px"></p>'
+        '<div class="doc-upload-status-wrap">' +
+        '<p id="docUploadStatus" class="doc-upload-status-line doc-muted"></p>' +
+        '<p id="docUploadProgress" class="doc-upload-status-line doc-upload-progress" hidden>' +
+        '<span id="docUploadProgressMain"></span>' +
+        '<span id="docUploadDots" class="doc-upload-dots" aria-hidden="true">' +
+        '<span class="doc-upload-dot"></span>' +
+        '<span class="doc-upload-dot"></span>' +
+        '<span class="doc-upload-dot"></span>' +
+        "</span></p></div>"
       );
     }
 
@@ -1330,6 +1968,7 @@
           setSelectedUploadFolderValue(created);
           const nin = document.getElementById("docNewFolderPath");
           if (nin) nin.value = "";
+          ragFoldersFetched = false;
         }
       } catch (e) {
         if (st) st.textContent = String(e.message || e);
@@ -1364,6 +2003,12 @@
       loginUser = "";
       authVerified = false;
       isAdminUser = false;
+      selectedRagFolder = "";
+      ragFoldersCache = [];
+      ragFoldersFetched = false;
+      updateRagFolderHint();
+      updateRagToolsBtnAppearance();
+      closeRagToolsPopover();
       localStorage.removeItem("samkwang_access_token");
       localStorage.removeItem("samkwang_username");
       updateAuthButton();
@@ -1473,14 +2118,18 @@
       sendBtn.disabled = true;
       typing.hidden = false;
       try {
+        const chatBody = {
+          message,
+          conversation_id: conversationId,
+          model: modelEl.value,
+        };
+        /* 자동: rag_folder 생략 → 백엔드에서 문서 검색 생략(LLM만). 폴더 선택 시에만 RAG */
+        const rag = (selectedRagFolder || "").trim();
+        if (rag) chatBody.rag_folder = rag;
         const r = await fetch("/api/chat", {
           method: "POST",
           headers: authHeadersJson(),
-          body: JSON.stringify({
-            message,
-            conversation_id: conversationId,
-            model: modelEl.value,
-          }),
+          body: JSON.stringify(chatBody),
         });
         const data = await r.json().catch(() => ({}));
         if (!r.ok) {

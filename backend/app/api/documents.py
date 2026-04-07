@@ -9,12 +9,12 @@ import shutil
 from pathlib import Path
 from typing import Union
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Response, UploadFile, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from ..config import Settings, get_settings, resolved_documents_dir
-from ..deps import require_admin
+from ..deps import get_current_user, require_admin
 from ..models.login_account import LoginAccount
 from ..models.user import User
 from ..services.rag_service import ingest_document, purge_stored_vectors_for_file, sync_documents_folder
@@ -50,6 +50,12 @@ class DocumentListResponse(BaseModel):
     )
 
 
+class RagFoldersResponse(BaseModel):
+    """채팅 RAG 도구(폴더 스코프) 선택용 — 로그인 사용자 누구나 조회 가능."""
+
+    folders: list[str]
+
+
 class UploadResponse(BaseModel):
     filename: str
     path: str
@@ -73,28 +79,16 @@ class DeleteItemResponse(BaseModel):
     kind: str  # "file" | "directory"
 
 
+class DeletePathBody(BaseModel):
+    """문서 검색 UI 등에서 POST 로 안전하게 삭제할 때 사용."""
+
+    path: str = Field(..., min_length=1, description="document 기준 상대 경로")
+
+
 def _doc_dir(settings: Settings) -> Path:
     root = resolved_documents_dir(settings)
     root.mkdir(parents=True, exist_ok=True)
     return root
-
-
-def ensure_default_document_subdirs(doc_dir: Path, settings: Settings) -> None:
-    """RAG 설정의 1단계 하위 폴더가 없으면 생성해 목록·업로드 UI에 항상 나타나게 한다."""
-    root = doc_dir.resolve()
-    for attr in ("rag_failure_subdir", "rag_knowledge_subdir", "rag_rules_subdir"):
-        raw = getattr(settings, attr, None)
-        if raw is None:
-            continue
-        name = str(raw).strip().replace("\\", "/").strip("/")
-        if not name or ".." in Path(name).parts:
-            continue
-        dest = (root / name).resolve()
-        try:
-            dest.relative_to(root)
-        except ValueError:
-            continue
-        dest.mkdir(parents=True, exist_ok=True)
 
 
 def _collect_folder_rels(doc_dir: Path, doc_infos: list[DocumentInfo]) -> list[str]:
@@ -118,6 +112,47 @@ def _collect_folder_rels(doc_dir: Path, doc_infos: list[DocumentInfo]) -> list[s
         for i in range(len(parts)):
             found.add("/".join(parts[: i + 1]))
     return sorted(found)
+
+
+def _normalize_delete_rel(raw: str) -> str:
+    rel = raw.strip().replace("\\", "/").strip("/")
+    if not rel or ".." in Path(rel).parts:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="잘못된 경로입니다.")
+    return rel
+
+
+def _delete_document_item_impl(doc_dir: Path, settings: Settings, rel: str) -> DeleteItemResponse:
+    target = _safe_target_under_doc_dir(doc_dir, rel)
+    if not target.exists():
+        raise HTTPException(status_code=404, detail="항목을 찾을 수 없습니다.")
+
+    if target.is_file():
+        target.unlink()
+        purge_stored_vectors_for_file(target, settings)
+        return DeleteItemResponse(path=rel, kind="file")
+
+    if target.is_dir():
+        try:
+            if any(target.iterdir()):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="폴더 안에 파일이나 하위 폴더가 있어 삭제할 수 없습니다.",
+                )
+        except OSError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="폴더 내용을 확인할 수 없습니다.",
+            ) from exc
+        try:
+            target.rmdir()
+        except OSError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="폴더를 삭제할 수 없습니다. 비어 있는 폴더만 삭제할 수 있습니다.",
+            ) from exc
+        return DeleteItemResponse(path=rel, kind="directory")
+
+    raise HTTPException(status_code=400, detail="파일 또는 폴더만 삭제할 수 있습니다.")
 
 
 def _normalize_subfolder(folder: str) -> str:
@@ -224,14 +259,41 @@ def create_document_folder(
     return CreateFolderResponse(path=rel, documents_path=str(doc_dir))
 
 
+@router.get("/documents/rag-folders", response_model=RagFoldersResponse)
+def list_rag_folders(
+    response: Response,
+    _: Union[User, LoginAccount] = Depends(get_current_user),
+    settings: Settings = Depends(get_settings),
+):
+    """로그인 사용자: document 하위 폴더 목록(채팅 도구 선택용)."""
+    response.headers["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+    doc_dir = _doc_dir(settings)
+    docs: list[DocumentInfo] = []
+    for p in sorted(doc_dir.rglob("*")):
+        if p.is_file():
+            if p.name in _EXCLUDED_FROM_DOCUMENT_LIST_NAMES:
+                continue
+            rel = p.relative_to(doc_dir).as_posix()
+            docs.append(
+                DocumentInfo(
+                    path=rel,
+                    name=p.name,
+                    size=p.stat().st_size,
+                )
+            )
+    folder_rels = _collect_folder_rels(doc_dir, docs)
+    return RagFoldersResponse(folders=folder_rels)
+
+
 @router.get("/documents/list", response_model=DocumentListResponse)
 def list_documents(
+    response: Response,
     _: Union[User, LoginAccount] = Depends(require_admin),
     settings: Settings = Depends(get_settings),
 ):
     """관리자만: document 폴더 내 파일 목록 및 하위 폴더 경로(빈 폴더 포함)."""
+    response.headers["Cache-Control"] = "no-store, max-age=0, must-revalidate"
     doc_dir = _doc_dir(settings)
-    ensure_default_document_subdirs(doc_dir, settings)
     docs: list[DocumentInfo] = []
     for p in sorted(doc_dir.rglob("*")):
         if p.is_file():
@@ -269,6 +331,18 @@ def download_document(
     return FileResponse(path=target)
 
 
+@router.post("/documents/item/delete", response_model=DeleteItemResponse)
+def delete_document_item_post(
+    body: DeletePathBody,
+    _: Union[User, LoginAccount] = Depends(require_admin),
+    settings: Settings = Depends(get_settings),
+):
+    """관리자만: POST 본문으로 경로를 넘겨 삭제(DELETE+쿼리가 막히는 환경 대비)."""
+    doc_dir = _doc_dir(settings)
+    rel = _normalize_delete_rel(body.path)
+    return _delete_document_item_impl(doc_dir, settings, rel)
+
+
 @router.delete("/documents/item", response_model=DeleteItemResponse)
 def delete_document_item(
     path: str = Query(..., min_length=1, description="document 기준 상대 경로(파일 또는 빈 폴더)"),
@@ -277,37 +351,5 @@ def delete_document_item(
 ):
     """관리자만: 파일 삭제(RAG 청크 제거) 또는 비어 있는 폴더만 삭제."""
     doc_dir = _doc_dir(settings)
-    rel = path.strip().replace("\\", "/").strip("/")
-    if not rel or ".." in Path(rel).parts:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="잘못된 경로입니다.")
-    target = _safe_target_under_doc_dir(doc_dir, rel)
-    if not target.exists():
-        raise HTTPException(status_code=404, detail="항목을 찾을 수 없습니다.")
-
-    if target.is_file():
-        target.unlink()
-        purge_stored_vectors_for_file(target, settings)
-        return DeleteItemResponse(path=rel, kind="file")
-
-    if target.is_dir():
-        try:
-            if any(target.iterdir()):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="폴더 안에 파일이나 하위 폴더가 있어 삭제할 수 없습니다.",
-                )
-        except OSError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="폴더 내용을 확인할 수 없습니다.",
-            ) from exc
-        try:
-            target.rmdir()
-        except OSError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="폴더를 삭제할 수 없습니다. 비어 있는 폴더만 삭제할 수 있습니다.",
-            ) from exc
-        return DeleteItemResponse(path=rel, kind="directory")
-
-    raise HTTPException(status_code=400, detail="파일 또는 폴더만 삭제할 수 있습니다.")
+    rel = _normalize_delete_rel(path)
+    return _delete_document_item_impl(doc_dir, settings, rel)
