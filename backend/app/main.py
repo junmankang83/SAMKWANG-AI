@@ -2,6 +2,7 @@
 FastAPI 애플리케이션 진입점.
 """
 
+import asyncio
 import logging
 
 from fastapi import FastAPI, Request
@@ -36,6 +37,21 @@ _settings = get_settings()
 _cors_origins = _parse_cors_origins(_settings.cors_origins)
 _cors_credentials = _cors_allow_credentials(_cors_origins)
 
+
+async def _rag_sync_background() -> None:
+    """기동 직후 API 가용성을 막지 않도록 RAG 전체 동기화는 스레드에서 실행."""
+    try:
+        stats = await asyncio.to_thread(sync_documents_folder, _settings)
+        logger.info(
+            "RAG 문서 동기화 완료: 청크=%s 파일=%s skipped=%s",
+            stats["indexed"],
+            stats.get("indexed_files", 0),
+            stats["skipped"],
+        )
+    except Exception:
+        logger.exception("RAG 문서 동기화 실패(서버 기동은 계속)")
+
+
 app = FastAPI(title="SAMKWANG AI API", version="1.0.0")
 
 app.add_middleware(
@@ -57,16 +73,7 @@ async def ensure_db_tables() -> None:
     """
     Base.metadata.create_all(bind=engine)
     ensure_login_admin_column_and_seed(engine)
-    try:
-        stats = sync_documents_folder(_settings)
-        logger.info(
-            "RAG 문서 동기화 완료: 청크=%s 파일=%s skipped=%s",
-            stats["indexed"],
-            stats.get("indexed_files", 0),
-            stats["skipped"],
-        )
-    except Exception:
-        logger.exception("RAG 문서 동기화 실패(서버 기동은 계속)")
+    asyncio.create_task(_rag_sync_background())
 
 
 @app.exception_handler(RequestValidationError)

@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from ..config import Settings, get_settings, resolved_documents_dir
-from ..deps import get_current_user, require_admin
+from ..deps import require_admin
 from ..models.login_account import LoginAccount
 from ..models.user import User
 from ..services.rag_service import ingest_document, purge_stored_vectors_for_file, sync_documents_folder
@@ -262,10 +262,9 @@ def create_document_folder(
 @router.get("/documents/rag-folders", response_model=RagFoldersResponse)
 def list_rag_folders(
     response: Response,
-    _: Union[User, LoginAccount] = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
 ):
-    """로그인 사용자: document 하위 폴더 목록(채팅 도구 선택용)."""
+    """공개: document 하위 폴더 목록(채팅 도구 선택용)."""
     response.headers["Cache-Control"] = "no-store, max-age=0, must-revalidate"
     doc_dir = _doc_dir(settings)
     docs: list[DocumentInfo] = []
